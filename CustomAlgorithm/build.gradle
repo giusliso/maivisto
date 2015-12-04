@@ -1,0 +1,77 @@
+buildscript {
+	repositories {
+		mavenLocal()
+		mavenCentral()
+		maven {
+			url 'https://oss.sonatype.org/content/repositories/snapshots/'
+		}
+	}
+	dependencies {
+		classpath 'org.grouplens.lenskit:lenskit-gradle:2.2-M3'
+	}
+}
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	maven {
+		url 'https://oss.sonatype.org/content/repositories/snapshots/'
+	}
+}
+
+apply plugin: 'idea'
+apply plugin: 'java'
+apply plugin: 'groovy'
+apply plugin: 'lenskit'
+
+
+
+/* Configure LensKit */
+lenskit {
+    version '2.2'
+maxMemory "12G"
+}
+
+import org.grouplens.lenskit.gradle.*
+
+/* Set up the repositories for getting LensKit and other libraries.
+ * These repositories are used for your Java or Groovy code, and for running LensKit.
+ */
+repositories {
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots/'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.apache.lucene:lucene-core:3.5.0'
+    compile 'org.apache.lucene:lucene-queries:3.5.0'
+    compile 'org.apache.lucene:lucene-analyzers:3.5.0'
+    compile "org.grouplens.lenskit:lenskit-cli:$lenskit.version"
+}
+
+
+
+/* Run the LensKit evaluation */
+task evaluate(type: LenskitEval, group: 'evaluate') {
+    description 'Runs the LensKit evaluation for cold start situations.'
+    dependsOn classes                           // perform java compilation before running this
+    script 'eval.groovy'                        // configure the name of the lenskit eval description
+
+	threadCount 4
+	maxMemory "12G"
+    classpath sourceSets.main.runtimeClasspath  // use the code we have here, plus its deps
+	targets 'eval'
+}
+
+task evaluate_all(type: LenskitEval, group: 'evaluate') {
+	description 'Runs the LensKit evaluation for all situations.'
+	dependsOn classes                           // perform java compilation before running this
+	script 'eval_all.groovy'                        // configure the name of the lenskit eval description
+
+	threadCount 4
+	maxMemory "12G"
+	classpath sourceSets.main.runtimeClasspath  // use the code we have here, plus its deps
+	targets 'eval'
+}
