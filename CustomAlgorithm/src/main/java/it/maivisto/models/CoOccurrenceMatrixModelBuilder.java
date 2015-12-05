@@ -47,11 +47,11 @@ public class CoOccurrenceMatrixModelBuilder implements Provider<ItemItemModel> {
 	@Override
 	public ItemItemModel get() {
 		int max = 0;
+		CoOccurrenceMatrixModel model=null;
+		//Serializer serializer=new Serializer();
 
-		Serializer serializer=new Serializer();
-
-		CoOccurrenceMatrixModel model=(CoOccurrenceMatrixModel) serializer.deserialize(Config.dirSerialModel, "CoOccurrenceMatrixModel");
-		if(model==null){
+		//CoOccurrenceMatrixModel model=(CoOccurrenceMatrixModel) serializer.deserialize(Config.dirSerialModel, "CoOccurrenceMatrixModel");
+		//if(model==null){
 
 			LongSortedSet allItems = context.getItems();
 			int nitems = allItems.size();
@@ -104,8 +104,8 @@ public class CoOccurrenceMatrixModelBuilder implements Provider<ItemItemModel> {
 			logger.info("built model for {} items in {}", ndone, timer);
 
 			model=new CoOccurrenceMatrixModel(finishRows(rows));			
-			serializer.serialize(Config.dirSerialModel,model,"CoOccurrenceMatrixModel");
-		}
+			//serializer.serialize(Config.dirSerialModel,model,"CoOccurrenceMatrixModel");
+		//}
 
 		return model;
 	}

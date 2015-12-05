@@ -9,9 +9,11 @@ import javax.inject.Qualifier;
 
 import org.grouplens.grapht.annotation.DefaultImplementation;
 
+import it.maivisto.models.ItemContentMatrixModel;
+
 @Documented
 @Qualifier
-@DefaultImplementation(ItemContentSimilarityModel.class)
+@DefaultImplementation(ItemContentMatrixModel.class)
 @Target({ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ItemContentSimilarityModel {

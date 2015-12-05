@@ -94,13 +94,13 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 
 						// assign the same number of similarities to each thread (the last one can have more similarities)
 						if(countItems!=simsThread || currThread==nthreads-1){
-							threads.get(currThread).addSimilarity(new Similarity(i,j));
 							countItems++;
 						}
 						else{
 							countItems=0;
 							currThread++;
 						}
+						threads.get(currThread).addSimilarity(new Similarity(i,j));
 					}
 
 				}
