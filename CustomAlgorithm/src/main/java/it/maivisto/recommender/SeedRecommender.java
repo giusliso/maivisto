@@ -18,6 +18,7 @@ import org.grouplens.lenskit.data.history.UserHistory;
 import org.grouplens.lenskit.knn.NeighborhoodSize;
 import org.grouplens.lenskit.knn.item.model.ItemItemModel;
 import org.grouplens.lenskit.scored.ScoredId;
+import org.grouplens.lenskit.scored.ScoredIdBuilder;
 import org.grouplens.lenskit.util.ScoredItemAccumulator;
 import org.grouplens.lenskit.util.TopNScoredItemAccumulator;
 import org.grouplens.lenskit.vectors.SparseVector;
@@ -224,6 +225,7 @@ public class SeedRecommender extends AbstractItemRecommender {
 					}
 				}			
 			}
+			if(!Double.isNaN(recscoreI/weightI))
 			reclist.put(itemId, recscoreI/weightI);
 		}
 
@@ -242,7 +244,7 @@ public class SeedRecommender extends AbstractItemRecommender {
 	private List<ScoredId> getRankedRecommendationsList(int n, List<RecommendationTriple> items){
 		logger.info("Ranking the recommendations list");
 
-		ScoredItemAccumulator recommendations = new TopNScoredItemAccumulator(n);
+		List<ScoredId> recommendations = new LinkedList<ScoredId>();
 
 		// groups items by id
 		HashMap<Long,List<RecommendationTriple>> unsortedMap = new HashMap<Long,List<RecommendationTriple>>();
@@ -275,10 +277,11 @@ public class SeedRecommender extends AbstractItemRecommender {
 		}
 
 		for(OccScoreTriple item : sortedList)
-			recommendations.put(item.getItemID(), item.getScore());
+			if(recommendations.size() != n)
+				recommendations.add(new ScoredIdBuilder(item.getItemID(), item.getScore()).build());
 
 		logger.info("Ranking completed");
-		return recommendations.finish();
+		return recommendations;
 	}
 
 	/**
