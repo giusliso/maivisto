@@ -19,7 +19,6 @@ import org.grouplens.lenskit.knn.NeighborhoodSize;
 import org.grouplens.lenskit.knn.item.model.ItemItemModel;
 import org.grouplens.lenskit.scored.ScoredId;
 import org.grouplens.lenskit.scored.ScoredIdBuilder;
-import org.grouplens.lenskit.util.ScoredItemAccumulator;
 import org.grouplens.lenskit.util.TopNScoredItemAccumulator;
 import org.grouplens.lenskit.vectors.SparseVector;
 import org.slf4j.Logger;
@@ -51,8 +50,10 @@ public class SeedRecommender extends AbstractItemRecommender {
 	@Inject
 	public SeedRecommender(EventDAO dao, ItemDAO idao, UserEventDAO uedao, 
 			ItemScorer scorer, 
-			@CoOccurrenceModel ItemItemModel coOccModel, @CosineSimilarityModel ItemItemModel cosModel,
-			@ItemContentSimilarityModel ItemItemModel contModel,@NeighborhoodSize int nnbrs) {
+			@CoOccurrenceModel ItemItemModel coOccModel, 
+			@CosineSimilarityModel ItemItemModel cosModel,
+			@ItemContentSimilarityModel ItemItemModel contModel, 
+			@NeighborhoodSize int nnbrs) {
 		this.uedao = uedao;
 		this.dao = dao;
 		this.idao = idao;
@@ -66,13 +67,13 @@ public class SeedRecommender extends AbstractItemRecommender {
 
 
 	/**
-     * Recommend a list of item to a user
-     * @param user The user ID.
-     * @param n The number of recommendations to produce, or a negative value to produce unlimited recommendations.
-     * @param candidates The candidate items
-     * @param exclude The exclude set
-     * @return The result list.
-     */
+	 * Recommend a list of item to a user
+	 * @param user The user ID.
+	 * @param n The number of recommendations to produce, or a negative value to produce unlimited recommendations.
+	 * @param candidates The candidate items
+	 * @param exclude The exclude set
+	 * @return The result list.
+	 */
 	@Override
 	protected List<ScoredId> recommend(long user, int n, LongSet candidates, LongSet excludes) {
 		UserHistory<Rating> userHistory = uedao.getEventsForUser(user, Rating.class);
@@ -175,7 +176,7 @@ public class SeedRecommender extends AbstractItemRecommender {
 	private List<ScoredId> noColdStartSituationAlgorithm(long user, int n){
 		UserHistory<Rating> userHistory = uedao.getEventsForUser(user, Rating.class);
 
-		logger.info("[ User {} rated {} items --> Not in Cold Start situation ]", user, userHistory.size());
+		logger.info("User {} rated {} items --> Not in Cold Start situation", user, userHistory.size());
 
 		TopNScoredItemAccumulator reclist = new TopNScoredItemAccumulator(n);		
 
@@ -225,8 +226,9 @@ public class SeedRecommender extends AbstractItemRecommender {
 					}
 				}			
 			}
-			if(!Double.isNaN(recscoreI/weightI))
-			reclist.put(itemId, recscoreI/weightI);
+			double score = recscoreI/weightI;
+			if(!Double.isNaN(score))
+				reclist.put(itemId, score);
 		}
 
 		return reclist.finish();
@@ -273,7 +275,9 @@ public class SeedRecommender extends AbstractItemRecommender {
 			}
 
 			// sorted first by number of occurrences, then by score
-			sortedList.add(new OccScoreTriple(item, unsortedMap.get(item).size(), score/totWm));	
+			score = score/totWm;
+			if(!Double.isNaN(score))
+				sortedList.add(new OccScoreTriple(item, unsortedMap.get(item).size(), score/totWm));	
 		}
 
 		for(OccScoreTriple item : sortedList)
