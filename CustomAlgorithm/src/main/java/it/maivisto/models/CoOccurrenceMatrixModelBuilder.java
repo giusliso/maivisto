@@ -18,8 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Stopwatch;
 
-import it.maivisto.utility.Config;
-import it.maivisto.utility.Serializer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongBidirectionalIterator;
@@ -47,67 +45,58 @@ public class CoOccurrenceMatrixModelBuilder implements Provider<ItemItemModel> {
 	@Override
 	public ItemItemModel get() {
 		int max = 0;
-		CoOccurrenceMatrixModel model=null;
-		//Serializer serializer=new Serializer();
 
-		//CoOccurrenceMatrixModel model=(CoOccurrenceMatrixModel) serializer.deserialize(Config.dirSerialModel, "CoOccurrenceMatrixModel");
-		//if(model==null){
+		LongSortedSet allItems = context.getItems();
+		int nitems = allItems.size();
 
-			LongSortedSet allItems = context.getItems();
-			int nitems = allItems.size();
+		logger.info("building item-item model for {} items", nitems);
+		logger.info("co-occurrence function is symmetric");
 
-			logger.info("building item-item model for {} items", nitems);
-			logger.info("co-occurrence function is symmetric");
+		Long2ObjectMap<ScoredItemAccumulator> rows = makeAccumulators(allItems);
 
-			Long2ObjectMap<ScoredItemAccumulator> rows = makeAccumulators(allItems);
+		Stopwatch timer = Stopwatch.createStarted();
+		int ndone=1;
+		for(LongBidirectionalIterator itI = allItems.iterator(); itI.hasNext() ; ) {
+			Long i = itI.next();
+			SparseVector vecI = context.itemVector(i);
 
-			Stopwatch timer = Stopwatch.createStarted();
-			int ndone=1;
-			for(LongBidirectionalIterator itI = allItems.iterator(); itI.hasNext() ; ) {
-				Long i = itI.next();
-				SparseVector vecI = context.itemVector(i);
+			if (logger.isDebugEnabled()) 
+				logger.info("computing co-occurrences for item {} ({} of {})", i, ndone, nitems);
 
-				if (logger.isDebugEnabled()) 
-					logger.info("computing co-occurrences for item {} ({} of {})", i, ndone, nitems);
+			for(LongBidirectionalIterator itJ = allItems.iterator(i); itJ.hasNext(); ) {
+				Long j = itJ.next();
+				SparseVector vecJ = context.itemVector(j);
+				int coOccurences = vecJ.countCommonKeys(vecI);
+				rows.get(i).put(j, coOccurences);
+				rows.get(j).put(i, coOccurences);
 
-				for(LongBidirectionalIterator itJ = allItems.iterator(i); itJ.hasNext(); ) {
-					Long j = itJ.next();
-					SparseVector vecJ = context.itemVector(j);
-					int coOccurences = vecJ.countCommonKeys(vecI);
-					rows.get(i).put(j, coOccurences);
-					rows.get(j).put(i, coOccurences);
-
-					if(coOccurences > max)
-						max=coOccurences;
-				}
-
-				if (logger.isDebugEnabled() && ndone % 100 == 0) 
-					logger.info("computed {} of {} model rows ({}s/row)", 
-							ndone, nitems, 
-							String.format("%.3f", timer.elapsed(TimeUnit.MILLISECONDS) * 0.001 / ndone));
-
-				ndone++;
+				if(coOccurences > max)
+					max=coOccurences;
 			}
 
-			logger.info("max co-occurrence value = {}", max);
-			logger.info("normalizing item-item model");
+			if (logger.isDebugEnabled() && ndone % 100 == 0) 
+				logger.info("computed {} of {} model rows ({}s/row)", 
+						ndone, nitems, 
+						String.format("%.3f", timer.elapsed(TimeUnit.MILLISECONDS) * 0.001 / ndone));
 
-			for(Long i : rows.keySet()){
-				ScoredItemAccumulator acc = new UnlimitedScoredItemAccumulator();			
-				for( ScoredId val : rows.get(i).finish())
-					acc.put(val.getId(), val.getScore()/max);					
-				rows.put(i, acc);
-			}
-			logger.info("normalized item-item model");		
+			ndone++;
+		}
 
-			timer.stop();
-			logger.info("built model for {} items in {}", ndone, timer);
+		logger.info("max co-occurrence value = {}", max);
+		logger.info("normalizing item-item model");
 
-			model=new CoOccurrenceMatrixModel(finishRows(rows));			
-			//serializer.serialize(Config.dirSerialModel,model,"CoOccurrenceMatrixModel");
-		//}
+		for(Long i : rows.keySet()){
+			ScoredItemAccumulator acc = new UnlimitedScoredItemAccumulator();			
+			for( ScoredId val : rows.get(i).finish())
+				acc.put(val.getId(), val.getScore()/max);					
+			rows.put(i, acc);
+		}
+		logger.info("normalized item-item model");		
 
-		return model;
+		timer.stop();
+		logger.info("built model for {} items in {}", ndone, timer);
+
+		return new CoOccurrenceMatrixModel(finishRows(rows));
 	}
 
 
