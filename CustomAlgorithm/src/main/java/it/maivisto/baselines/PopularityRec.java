@@ -59,21 +59,25 @@ public class PopularityRec extends AbstractItemRecommender {
 			for(Rating rate : userHistory)
 				recommendableItems.remove(rate.getItemId());		
 
-		logger.info("Sorting {} items by popularity", recommendableItems.size());
 		TreeSet<Popularity> popTree = new TreeSet<>(); // items sorted by popularity
 		for(Long itemId : recommendableItems)
 			popTree.add(new Popularity(itemId, iedao.getEventsForItem(itemId).size()));
 		logger.info("Sorted {} items by popularity", recommendableItems.size());
 
 		// add n items to the recommendations list
+		int lastPop=0;
 		int count = 0;
 		for(Popularity pop : popTree) {
 			if(count!=n){
-				reclist.put(pop.getItem(), scorer.score(user, pop.getItem()));
+				reclist.put(pop.getItem(),scorer.score(user, pop.getItem()));
+				lastPop = pop.getPopularity();
 				count++;
 			}
 			else
-				break;
+				if(pop.getPopularity() == lastPop)
+					reclist.put(pop.getItem(),scorer.score(user, pop.getItem()));
+				else
+					break;
 		}
 
 		return reclist.finish();
@@ -98,6 +102,11 @@ public class PopularityRec extends AbstractItemRecommender {
 
 		public long getItem() {
 			return item;
+		}
+
+		@Override
+		public String toString() {
+			return "[item: "+item+", popularity: "+popularity+"]";
 		}
 
 		/**
