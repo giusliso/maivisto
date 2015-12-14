@@ -65,25 +65,34 @@ public class CoCoverageRec extends AbstractItemRecommender {
 		for(Long itemId : recommendableItems){
 			SparseVector vec = coOccModel.getNeighbors(itemId);
 			double cocoverage = vec.sum();
-			coOccTree.add(new CoCoverage(itemId, cocoverage));
+			coOccTree.add(new CoCoverage(itemId, cocoverage, 0));
 		}
 		logger.info("Sorted {} items by co-coverage", recommendableItems.size());
 
-		// add n items to the recommendations list
+		TreeSet<CoCoverage> recTree = new TreeSet<CoCoverage>(); 
+
 		double lastCocov=0;
 		int count = 0;
 		for(CoCoverage coOcc : coOccTree) {
 			if(count!=n){
-				reclist.put(coOcc.getItem(), scorer.score(user, coOcc.getItem()));
+				recTree.add(new CoCoverage(coOcc.getItem(),coOcc.getCoCoverage(),scorer.score(user, coOcc.getItem())));
 				lastCocov = coOcc.getCoCoverage();
 				count++;
 			}
 			else
 				if(coOcc.getCoCoverage() == lastCocov)
-					reclist.put(coOcc.getItem(), scorer.score(user, coOcc.getItem()));
+					recTree.add(new CoCoverage(coOcc.getItem(),coOcc.getCoCoverage(),scorer.score(user, coOcc.getItem())));
 				else
 					break;
 		}
+
+		// add n items to the recommendations list
+		count = 0;
+		for(CoCoverage coOcc : recTree)
+			if(count!=n){
+				reclist.put(coOcc.getItem(),scorer.score(user, coOcc.getItem()));
+				count++;
+			}
 
 		return reclist.finish(); 
 	}
@@ -94,11 +103,13 @@ public class CoCoverageRec extends AbstractItemRecommender {
 	 */
 	private class CoCoverage implements Comparable<CoCoverage> {
 		private final double cocoverage;
+		private final double score;
 		private final long item;
 
-		public CoCoverage(long item, double cocoverage) {
+		public CoCoverage(long item, double cocoverage, double score) {
 			this.item=item;
 			this.cocoverage=cocoverage;
+			this.score=score;
 		}
 
 		public double getCoCoverage() {
@@ -109,11 +120,15 @@ public class CoCoverageRec extends AbstractItemRecommender {
 			return item;
 		}
 
+		public double getScore() {
+			return score;
+		}
+
 		@Override
 		public String toString() {
 			return "[item: "+item+", cocoverage: "+cocoverage+"]";
 		}
-		
+
 		/**
 		 * Sorts values by co-coverage and then by item
 		 */
@@ -122,6 +137,10 @@ public class CoCoverageRec extends AbstractItemRecommender {
 			if(cocoverage < o.getCoCoverage())
 				return 1;
 			else if(cocoverage > o.getCoCoverage())
+				return -1;
+			else if(score < o.getScore())
+				return 1;
+			else if (score > o.getScore())
 				return -1;
 			else if(item < o.getItem())
 				return 1;
