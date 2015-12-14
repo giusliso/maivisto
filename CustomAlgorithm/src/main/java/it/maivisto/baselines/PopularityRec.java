@@ -59,26 +59,36 @@ public class PopularityRec extends AbstractItemRecommender {
 			for(Rating rate : userHistory)
 				recommendableItems.remove(rate.getItemId());		
 
-		TreeSet<Popularity> popTree = new TreeSet<>(); // items sorted by popularity
+		TreeSet<Popularity> popTree = new TreeSet<Popularity>(); // items sorted by popularity
 		for(Long itemId : recommendableItems)
-			popTree.add(new Popularity(itemId, iedao.getEventsForItem(itemId).size()));
+			popTree.add(new Popularity(itemId, iedao.getEventsForItem(itemId).size(),0));
 		logger.info("Sorted {} items by popularity", recommendableItems.size());
 
-		// add n items to the recommendations list
+
+		TreeSet<Popularity> recTree = new TreeSet<Popularity>(); 		
+
 		int lastPop=0;
 		int count = 0;
 		for(Popularity pop : popTree) {
 			if(count!=n){
-				reclist.put(pop.getItem(),scorer.score(user, pop.getItem()));
+				recTree.add(new Popularity(pop.getItem(),pop.getPopularity(),scorer.score(user, pop.getItem())));
 				lastPop = pop.getPopularity();
 				count++;
 			}
 			else
 				if(pop.getPopularity() == lastPop)
-					reclist.put(pop.getItem(),scorer.score(user, pop.getItem()));
+					recTree.add(new Popularity(pop.getItem(),pop.getPopularity(),scorer.score(user, pop.getItem())));
 				else
 					break;
 		}
+
+		// add n items to the recommendations list
+		count = 0;
+		for(Popularity pop : recTree)
+			if(count!=n){
+				reclist.put(pop.getItem(),scorer.score(user, pop.getItem()));
+				count++;
+			}
 
 		return reclist.finish();
 	}
@@ -90,10 +100,12 @@ public class PopularityRec extends AbstractItemRecommender {
 	private class Popularity implements Comparable<Popularity> {
 		private final int popularity;
 		private final long item;
+		private final double score;
 
-		public Popularity(long item, int popularity) {
+		public Popularity(long item, int popularity, double score) {
 			this.item=item;
 			this.popularity=popularity;
+			this.score=score;
 		}
 
 		public int getPopularity() {
@@ -102,6 +114,10 @@ public class PopularityRec extends AbstractItemRecommender {
 
 		public long getItem() {
 			return item;
+		}
+
+		public double getScore() {
+			return score;
 		}
 
 		@Override
@@ -117,6 +133,10 @@ public class PopularityRec extends AbstractItemRecommender {
 			if(popularity < o.getPopularity())
 				return 1;
 			else if(popularity > o.getPopularity())
+				return -1;
+			else if(score < o.getScore())
+				return 1;
+			else if (score > o.getScore())
 				return -1;
 			else if(item < o.getItem())
 				return 1;
