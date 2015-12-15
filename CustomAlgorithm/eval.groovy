@@ -30,15 +30,25 @@ import org.grouplens.lenskit.transform.truncate.VectorTruncator
 import org.grouplens.lenskit.vectors.similarity.CosineVectorSimilarity
 import org.grouplens.lenskit.vectors.similarity.VectorSimilarity
 import org.hamcrest.Matchers
-import org.grouplens.lenskit.ItemRecommender;
-import org.grouplens.lenskit.knn.item.model.SimilarityMatrixModel
-import org.grouplens.lenskit.eval.metrics.topn.PrecisionRecallTopNMetric
-import TopNMapMetric
 
-import com.thesis.models.CoOccurrenceMatrixModel
-import com.thesis.qualifiers.CoOccurrenceModel;
-import com.thesis.qualifiers.CosineSimilarityModel;
-import com.thesis.recommender.SeedRecommender
+import com.sun.org.apache.xalan.internal.xsltc.compiler.Import;
+
+import org.grouplens.lenskit.ItemRecommender
+import org.grouplens.lenskit.knn.item.model.SimilarityMatrixModel
+import TopNMapMetric
+import it.maivisto.baselines.CoCoverageRec
+import it.maivisto.baselines.PopularityRec
+import it.maivisto.baselines.RandomPopularityRec
+import it.maivisto.evaluation.CustomRMSEPredictMetric;
+import it.maivisto.models.CoOccurrenceMatrixModel
+import it.maivisto.models.CosineSimilarityMatrixModel
+import it.maivisto.models.ItemContentMatrixModel
+import it.maivisto.qualifiers.CoOccurrenceModel
+import it.maivisto.qualifiers.CosineSimilarityModel
+import it.maivisto.qualifiers.ItemContentSimilarityModel
+import it.maivisto.recommender.SeedRecommender
+import it.maivisto.evaluation.CustomPrecisionRecallTopNMetric
+
 
 dataDir = "build/data"
 
@@ -73,8 +83,8 @@ datasetName = "ml100k"
 
 sizes = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
 maxSize = 19
-//sizes = [0,5,10,15,20,30,40,50,60,70,80,90,100]
-//maxSize = 100
+
+
 
 // process all datasets
 crossfolds = [:]
@@ -136,57 +146,21 @@ target("cold-eval") {
 		componentCacheDirectory "build/componentCache"
 		cacheAllComponents true
 
-		addMetric RMSEPredictMetric
-		addMetric NDCGPredictMetric
-		addMetric ItemScorerCoveragePredictMetric;
-		addMetric topNConfig(new TopNLengthMetric.Builder())
-		addMetric topNConfig(new TopNPopularityMetric.Builder())
-		addMetric topNConfig(new TopNEntropyMetric.Builder())
-		addMetric topNConfig(new TopNDiversityMetric.Builder())
-		addMetric topNConfig(new TopNRMSEMetric.Builder())
+//		addMetric topNConfig(new CustomRMSEPredictMetric.Builder())
+//		addMetric topNConfig(new NDCGTopNMetric.Builder())
 
-
-		def mapM1 = new TopNMapMetric.Builder()
-		mapM1.setGoodItems(ItemSelectors.testRatingMatches(Matchers.greaterThanOrEqualTo(4.0d)))
-
-		def mapM2 = new TopNMapMetric.Builder()
-		mapM2.setGoodItems(ItemSelectors.testRatingMatches(Matchers.greaterThanOrEqualTo(5.0d)))
-		mapM2.setSuffix("5")
-
-		addMetric topNConfig(mapM1)
-		addMetric topNConfig(mapM2)
-
-		def prM1 = new PrecisionRecallTopNMetric.Builder()
-		prM1.setGoodItems(ItemSelectors.testRatingMatches(Matchers.greaterThanOrEqualTo(4.0d)))
-
-		def prM2 = new PrecisionRecallTopNMetric.Builder()
-		prM2.setGoodItems(ItemSelectors.testRatingMatches(Matchers.greaterThanOrEqualTo(5.0d)))
-		prM2.setSuffix("5")
-
-		def prM3 = new PrecisionRecallTopNMetric.Builder()
-		prM3.setSuffix("fallout")
-		prM3.setGoodItems(ItemSelectors.testRatingMatches(Matchers.lessThanOrEqualTo(2.0d)))
-
-		def prM4 = new PrecisionRecallTopNMetric.Builder()
-		prM4.setSuffix("fallout1")
-		prM4.setGoodItems(ItemSelectors.testRatingMatches(Matchers.lessThanOrEqualTo(1.0d)))
-
-		addMetric topNConfig(prM1)
-		addMetric topNConfig(prM2)
-		addMetric topNConfig(prM3)
-		addMetric topNConfig(prM4)
-
-
-
+		addMetric topNConfig(new CustomPrecisionRecallTopNMetric.Builder())
+		
 		for (size in sizes) {
 			dataset crossfolds[datasetName][size]
 		}
 
-		//		algorithm 'Algorithms/SeedRecommender.groovy', name: 'SeedRecommender'
-		//		algorithm 'Algorithms/ItemItem.groovy', name: 'ItemItem'
-		//		algorithm 'Algorithms/svd.groovy', name: 'FunkSVD'
+		scorerConfig = {
+			bind ItemScorer to UserMeanItemScorer
+			bind (UserMeanBaseline, ItemScorer) to ItemMeanRatingItemScorer
+			set MeanDamping to 5.0d
+		}
 
-		// Standard item-item CF.
 		algorithm("ItemItem") {
 			bind ItemScorer to ItemItemScorer
 			within (ItemScorer) {
@@ -197,7 +171,7 @@ target("cold-eval") {
 					set MeanDamping to 5.0d
 				}
 				set ModelSize to 500
-				set NeighborhoodSize to 30
+				set NeighborhoodSize to 21
 			}
 			bind (BaselineScorer, ItemScorer) to UserMeanItemScorer
 			bind (UserMeanBaseline, ItemScorer) to ItemMeanRatingItemScorer
@@ -214,18 +188,33 @@ target("cold-eval") {
 			set IterationCount to 150
 		}
 
+		algorithm("Popularity") {
+			bind ItemRecommender to PopularityRec
+			include scorerConfig
+		}
+
+		algorithm("RandomPopularity") {
+			bind ItemRecommender to RandomPopularityRec
+			include scorerConfig
+		}
+
+		algorithm("CoCoverage") {
+			bind ItemRecommender to CoCoverageRec
+			include scorerConfig
+		}
 
 		algorithm("SeedRec") {
 			bind ItemRecommender to SeedRecommender
 			bind ItemScorer to UserMeanItemScorer
 			bind (UserMeanBaseline, ItemScorer) to ItemMeanRatingItemScorer
 			set MeanDamping to 5.0d
-			set NeighborhoodSize to 20
+			set NeighborhoodSize to 7
 			bind (CoOccurrenceModel, ItemItemModel) to CoOccurrenceMatrixModel
-			bind (CosineSimilarityModel, ItemItemModel) to SimilarityMatrixModel
+			bind (CosineSimilarityModel, ItemItemModel) to CosineSimilarityMatrixModel
 			within (CosineSimilarityModel, ItemItemModel) {
 				bind VectorSimilarity to CosineVectorSimilarity
 			}
+			bind (ItemContentSimilarityModel, ItemItemModel) to ItemContentMatrixModel
 		}
 	}
 }

@@ -17,6 +17,10 @@ repositories {
 	maven {
 		url 'https://oss.sonatype.org/content/repositories/snapshots/'
 	}
+	
+	flatDir {
+		dirs 'lib'
+	}
 }
 
 apply plugin: 'idea'
@@ -29,26 +33,22 @@ apply plugin: 'lenskit'
 /* Configure LensKit */
 lenskit {
     version '2.2'
-maxMemory "12G"
+maxMemory "10G"
 }
 
 import org.grouplens.lenskit.gradle.*
 
-/* Set up the repositories for getting LensKit and other libraries.
- * These repositories are used for your Java or Groovy code, and for running LensKit.
- */
-repositories {
-    maven {
-        url 'https://oss.sonatype.org/content/repositories/snapshots/'
-    }
-    mavenCentral()
-}
+
 
 dependencies {
     compile 'org.apache.lucene:lucene-core:3.5.0'
     compile 'org.apache.lucene:lucene-queries:3.5.0'
     compile 'org.apache.lucene:lucene-analyzers:3.5.0'
     compile "org.grouplens.lenskit:lenskit-cli:$lenskit.version"
+	compile name: 'TextualSimilarity-pg-30112015'
+	compile fileTree(dir: 'lib', include: ['*.jar'])
+	compile fileTree(dir: 'lib/TextualSimilarity/lib', include: ['*.jar'])
+
 }
 
 
@@ -60,18 +60,17 @@ task evaluate(type: LenskitEval, group: 'evaluate') {
     script 'eval.groovy'                        // configure the name of the lenskit eval description
 
 	threadCount 4
-	maxMemory "12G"
+	maxMemory "10G"
     classpath sourceSets.main.runtimeClasspath  // use the code we have here, plus its deps
-	targets 'eval'
+	targets 'cold-eval'
 }
 
-task evaluate_all(type: LenskitEval, group: 'evaluate') {
+task evaluate_all(type: LenskitEval, group: 'evaluate_all') {
 	description 'Runs the LensKit evaluation for all situations.'
 	dependsOn classes                           // perform java compilation before running this
 	script 'eval_all.groovy'                        // configure the name of the lenskit eval description
 
 	threadCount 4
-	maxMemory "12G"
+	maxMemory "10G"
 	classpath sourceSets.main.runtimeClasspath  // use the code we have here, plus its deps
-	targets 'eval'
 }
