@@ -8,11 +8,11 @@ import java.lang.annotation.Target;
 import javax.inject.Qualifier;
 
 import org.grouplens.grapht.annotation.DefaultImplementation;
-import org.grouplens.lenskit.knn.item.model.SimilarityMatrixModel;
+import it.maivisto.models.CosineSimilarityMatrixModel;
 
 @Documented
 @Qualifier
-@DefaultImplementation(SimilarityMatrixModel.class)
+@DefaultImplementation(CosineSimilarityMatrixModel.class)
 @Target({ElementType.METHOD, ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CosineSimilarityModel {
