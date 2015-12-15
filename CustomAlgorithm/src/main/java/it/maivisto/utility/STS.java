@@ -25,6 +25,7 @@ import ts.similarity.impl.distributional.VectorStoreRAM;
  *
  * @author annalina
  */
+@SuppressWarnings("unused")
 public class STS {
 
     NlpPipeline nlpPipeline = null;
