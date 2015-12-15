@@ -29,19 +29,24 @@ public class OccScoreTriple implements Comparable<OccScoreTriple> {
 		return occurrences;
 	}
 
+	@Override
+	public String toString() {
+		return "[item: "+itemID+", occurrences: "+occurrences+", score: "+score+"]";
+	}
+	
 	/**
 	 * Sort elements first by number of occurrences, then by score
 	 */
 	@Override
 	public int compareTo(OccScoreTriple o) {
 		if(this.getOccurrences() < o.getOccurrences())
-			return -1;
-		else if(this.getOccurrences() > o.getOccurrences())
 			return 1;
-		else if(this.getScore() < o.getScore())
+		else if(this.getOccurrences() > o.getOccurrences())
 			return -1;
+		else if(this.getScore() < o.getScore())
+			return 1;
 		else if(this.getScore() > o.getScore())
-			return 1;	
+			return -1;	
 		else
 			return 0;
 	}
