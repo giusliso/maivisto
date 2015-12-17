@@ -23,7 +23,7 @@ import it.maivisto.qualifiers.CoOccurrenceModel;
 import it.unimi.dsi.fastutil.longs.LongSet;
 
 /**
- * Co-coverage Recommender. 
+ * Co-Coverage Recommender. 
  * It recommends the list of the 'n' items that are highly co-rated by the users.
  */
 public class CoCoverageRec extends AbstractItemRecommender {
@@ -43,11 +43,11 @@ public class CoCoverageRec extends AbstractItemRecommender {
 	}
 
 	/**
-	 * Recommend a list of item to a user
+	 * It recommends a list of item to a user.
 	 * @param user The user ID.
 	 * @param n The number of recommendations to produce, or a negative value to produce unlimited recommendations.
-	 * @param candidates The candidate items
-	 * @param exclude The exclude set
+	 * @param candidates The candidate items.
+	 * @param exclude The exclude set.
 	 * @return The result list.
 	 */
 	@Override
@@ -98,8 +98,8 @@ public class CoCoverageRec extends AbstractItemRecommender {
 	}
 
 	/**
-	 * Inner class that stores information about the cocoverage of an item.
-	 * It stores a couple of values < itemID , cocoverage >.
+	 * Inner class that stores information about the co-coverage of an item.
+	 * It stores a triple of values < itemID , co-coverage , score >.
 	 */
 	private class CoCoverage implements Comparable<CoCoverage> {
 		private final double cocoverage;
@@ -126,11 +126,11 @@ public class CoCoverageRec extends AbstractItemRecommender {
 
 		@Override
 		public String toString() {
-			return "[item: "+item+", cocoverage: "+cocoverage+"]";
+			return "[item: "+item+", cocoverage: "+cocoverage+", score: "+score+"]";
 		}
 
 		/**
-		 * Sorts values by co-coverage and then by item
+		 * Sorts values by co-coverage, by score and then by item.
 		 */
 		@Override
 		public int compareTo(CoCoverage o) {

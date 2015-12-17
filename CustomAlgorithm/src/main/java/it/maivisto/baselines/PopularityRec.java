@@ -39,13 +39,12 @@ public class PopularityRec extends AbstractItemRecommender {
 		this.scorer = scorer;
 	}
 
-
 	/**
-	 * Recommend a list of item to a user
+	 * It recommends a list of item to a user
 	 * @param user The user ID.
 	 * @param n The number of recommendations to produce, or a negative value to produce unlimited recommendations.
-	 * @param candidates The candidate items
-	 * @param exclude The exclude set
+	 * @param candidates The candidate items.
+	 * @param exclude The exclude set.
 	 * @return The result list.
 	 */
 	@Override
@@ -95,7 +94,7 @@ public class PopularityRec extends AbstractItemRecommender {
 
 	/**
 	 * Inner class that stores information about the popularity of an item.
-	 * It stores a couple of values < itemID , number of ratings >.
+	 * It stores a triple of values < itemID , number of ratings, score >.
 	 */
 	private class Popularity implements Comparable<Popularity> {
 		private final int popularity;
@@ -122,11 +121,11 @@ public class PopularityRec extends AbstractItemRecommender {
 
 		@Override
 		public String toString() {
-			return "[item: "+item+", popularity: "+popularity+"]";
+			return "[item: "+item+", popularity: "+popularity+", score: "+score+"]";
 		}
 
 		/**
-		 * Sorts values by popularity and then by item
+		 * It sorts values by popularity, by score and then by item.
 		 */
 		@Override
 		public int compareTo(Popularity o) {
@@ -145,6 +144,5 @@ public class PopularityRec extends AbstractItemRecommender {
 			else
 				return 0;
 		}
-
 	}
 }

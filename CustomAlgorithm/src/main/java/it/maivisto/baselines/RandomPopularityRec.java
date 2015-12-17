@@ -40,13 +40,12 @@ public class RandomPopularityRec extends AbstractItemRecommender {
 		this.scorer = scorer;
 	}
 
-
 	/**
-	 * Recommend a list of item to a user
+	 * It recommends a list of item to a user.
 	 * @param user The user ID.
 	 * @param n The number of recommendations to produce, or a negative value to produce unlimited recommendations.
-	 * @param candidates The candidate items
-	 * @param exclude The exclude set
+	 * @param candidates The candidate items.
+	 * @param exclude The exclude set.
 	 * @return The result list.
 	 */
 	@Override
@@ -91,5 +90,4 @@ public class RandomPopularityRec extends AbstractItemRecommender {
 
 		return reclist.finish();
 	}
-
 }
