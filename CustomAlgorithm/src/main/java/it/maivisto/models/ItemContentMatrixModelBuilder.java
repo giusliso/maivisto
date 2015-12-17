@@ -355,7 +355,7 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 	/**
 	 * Thread that computes a certain number of similarities.
 	 */
-	class ItemContentThread extends Thread {
+	private class ItemContentThread extends Thread {
 		private STS valueSim;
 		private LinkedList<Similarity> similarities;
 

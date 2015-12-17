@@ -17,10 +17,10 @@ public class Serializer {
 	private Kryo kryo=null;
 	
 	/**
-	 * Serialize an object
-	 * @param dirPath directory in which serialize the object
-	 * @param obj object to serialize
-	 * @param filename name of the file
+	 * Serializes an object.
+	 * @param dirPath Directory in which serialize the object.
+	 * @param obj Object to serialize.
+	 * @param filename Name of the file.
 	 */
 	public Serializer(){
 		 kryo = new Kryo();
@@ -41,10 +41,10 @@ public class Serializer {
 	}
 
 	/**
-	 * Deserialize an object.
-	 * @param dirPath directory containing the file
-	 * @param filename name of the file
-	 * @param class of the object to deserialize
+	 * Deserializes an object.
+	 * @param dirPath Directory containing the file.
+	 * @param filename Name of the file.
+	 * @param cl Class of the object to deserialize.
 	 */
 	public <T> Object deserialize(String dirPath, String filename,Class<T> cl){
 		logger.info("Deserializing "+filename+"...");
@@ -57,13 +57,12 @@ public class Serializer {
 		} catch (Exception e) {
 			logger.error(e.getMessage());
 			return null;
-		} 
-		
+		} 		
 	}
 
 	/**
-	 * Register a not serializable class to serialize
-	 * @param cl class not serializable
+	 * Registers a not serializable class to serialize.
+	 * @param cl class not serializable.
 	 */
 	public <T> void register(Class<T> cl) {
 		kryo.register(cl);

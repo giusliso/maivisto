@@ -4,7 +4,7 @@ import org.grouplens.lenskit.data.event.Rating;
 import org.grouplens.lenskit.data.history.UserHistory;
 
 /**
- * Utility methods
+ * Utility methods.
  */
 public class Utilities {
 	/**
@@ -22,8 +22,9 @@ public class Utilities {
 	}
 
 	/**
-	 * @param userHistory ratings by user
-	 * @return ratings mean value
+	 * Returns the mean value of user ratings.
+	 * @param userHistory The user ratings.
+	 * @return The mean value.
 	 */
 	public static double meanValue(UserHistory<Rating> userHistory){
 		double sum=0.0;
