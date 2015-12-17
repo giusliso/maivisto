@@ -125,7 +125,7 @@ public class PopularityRec extends AbstractItemRecommender {
 		}
 
 		/**
-		 * It sorts values by popularity, by score and then by item.
+		 * It sorts values by popularity, by score and then by item (in descending order). 
 		 */
 		@Override
 		public int compareTo(Popularity o) {

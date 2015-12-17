@@ -2,9 +2,9 @@ package it.maivisto.recommender;
 
 /**
  * A set of three elements:
- * - the item ID
- * - the score for that item
- * - the number of occurrences
+ * - the item ID;
+ * - the score for that item;
+ * - the number of occurrences.
  */
 public class OccScoreTriple implements Comparable<OccScoreTriple> {
 	private long itemID;
@@ -35,7 +35,7 @@ public class OccScoreTriple implements Comparable<OccScoreTriple> {
 	}
 	
 	/**
-	 * Sort elements first by number of occurrences, then by score
+	 * Sorts elements first by number of occurrences, then by score (in descending order).
 	 */
 	@Override
 	public int compareTo(OccScoreTriple o) {

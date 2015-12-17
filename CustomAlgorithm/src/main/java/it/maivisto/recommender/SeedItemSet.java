@@ -38,7 +38,6 @@ public class SeedItemSet {
 		this.idao = dataset.getItemDAO();
 		this.dao = dataset.getEventDAO();
 		this.set = new HashSet<Long>();
-		find();
 	}
 
 	public SeedItemSet(EventDAO dao) {
@@ -46,22 +45,12 @@ public class SeedItemSet {
 		this.idao = new PrefetchingItemDAO(dao);
 		this.dao = dao;
 		this.set = new HashSet<Long>();
-		find();
 	}
 
-	/**
-	 * Retrieve the four standard seed items.
-	 */
-	private void find() {
-		addItem(getMostPopularItem(Period.EVER));
-		addItem(getMostPopularItem(Period.LAST_WEEK));
-		addItem(getLastPositivelyRatedItem());
-		addItem(getLastItemAddedNotRated());
-	}
 
 	/**
-	 * Add an item to the standard seed items set.
-	 * @param item the item to add
+	 * Adds an item to the standard seed items set.
+	 * @param item The item to add.
 	 */
 	private void addItem(Long item){
 		if(item != null)
@@ -69,19 +58,26 @@ public class SeedItemSet {
 	}
 
 	/**
-	 * @return the standard seed items set
+	 * Retrieves the four standard seed items.
+	 * @return The standard seed items set.
 	 */
-	public Set<Long> getSeedItemSet() {
+	public Set<Long> getStandardSeedItemSet() {
+		if(set.isEmpty()){
+			addItem(getMostPopularItem(Period.EVER));
+			addItem(getMostPopularItem(Period.LAST_WEEK));
+			addItem(getLastPositivelyRatedItem());
+			addItem(getLastItemAddedNotRated());
+		}
 		return set;
 	}
 
 	/**
-	 * Get the most popular item, i.e. the item with the greatest number of ratings, in a certain period of time (last week/month/year/ever).
-	 * @param period period of time to consider
-	 * @return the most popular item
+	 * Gets the most popular item, i.e. the item with the greatest number of ratings, in a certain period of time (last week/month/year/ever).
+	 * @param period Period of time to consider.
+	 * @return The most popular item.
 	 */
 	@SuppressWarnings("deprecation")
-	private Long getMostPopularItem(Period period) {
+	public Long getMostPopularItem(Period period) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(getLastTimestamp()); 
 
@@ -122,8 +118,8 @@ public class SeedItemSet {
 	}
 
 	/**
-	 * Get the timestamp of the first rating in the dataset
-	 * @return the timestamp
+	 * Gets the timestamp of the first rating in the dataset.
+	 * @return The timestamp.
 	 */
 	private Date getFirstTimestamp(){
 
@@ -139,8 +135,8 @@ public class SeedItemSet {
 	}
 
 	/**
-	 * Get the timestamp of the last rating in the dataset
-	 * @return the timestamp
+	 * Gets the timestamp of the last rating in the dataset.
+	 * @return The timestamp.
 	 */
 	private Date getLastTimestamp(){
 
@@ -158,12 +154,11 @@ public class SeedItemSet {
 
 
 	/**
-	 * Get the last positively rated item (the last item added in the platform rated in a positive way).
+	 * Gets the last positively rated item (the last item added in the platform rated in a positive way).
 	 * An item is "positively rated" if its rate is equals or greater than the global mean of all ratings.
-
-	 * @return the last positively rated item
+	 * @return The last positively rated item.
 	 */
-	private Long getLastPositivelyRatedItem(){
+	public Long getLastPositivelyRatedItem(){
 		Long lastPositivelyRatedItem = null;
 		Date recentDate = getFirstTimestamp(); 
 
@@ -186,6 +181,11 @@ public class SeedItemSet {
 		return lastPositivelyRatedItem;
 	}
 
+	/**
+	 * Returns the mean value of a list of ratings.
+	 * @param ratings The list of ratings.
+	 * @return The mean value.
+	 */
 	private int getPositiveRatingThreshold(List<Rating> ratings){
 		int threshold=0;
 		for(Rating r : ratings)
@@ -195,10 +195,10 @@ public class SeedItemSet {
 
 
 	/**
-	 * Get the most recently added item not rated yet (new item in the platform).
-	 * @return the most recently added item not rated yet
+	 * Gets the most recently added item not rated yet (new item in the platform).
+	 * @return The most recently added item not rated yet.
 	 */
-	private Long getLastItemAddedNotRated(){
+	public Long getLastItemAddedNotRated(){
 		Long lastItemAdded = null;
 		Date threshold = null;
 

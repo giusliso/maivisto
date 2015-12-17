@@ -130,7 +130,7 @@ public class CoCoverageRec extends AbstractItemRecommender {
 		}
 
 		/**
-		 * Sorts values by co-coverage, by score and then by item.
+		 * Sorts values by co-coverage, by score and then by item (in descending order).
 		 */
 		@Override
 		public int compareTo(CoCoverage o) {
