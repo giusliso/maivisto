@@ -25,10 +25,10 @@ import it.unimi.dsi.fastutil.longs.LongListIterator;
 import it.unimi.dsi.fastutil.longs.LongLists;
 
 /**
- * It extends the lenskit CrossfoldTask class and runs a custom crossfold on the data source file 
+ * It extends the lenskit CrossfoldTask class, runs a custom crossfold on the data source file 
  * and outputs the partition files. After selecting training and testing users for each partition, 
- * it sets a certain percentage of test users in cold start condition (i.e. number of rating < 20)
- * and splits them into profile sizes from 0 to 19 ratings. 
+ * it sets a certain percentage of test users in cold start condition (users with a number of ratings < 20)
+ * in the training set, splitting them equally into profile sizes from 0 to 19 ratings. 
  */
 public class CrossfoldColdUserTask extends CrossfoldTask {
 	private static final Logger logger = LoggerFactory.getLogger(CrossfoldColdUserTask.class);
@@ -40,7 +40,7 @@ public class CrossfoldColdUserTask extends CrossfoldTask {
 	}
 
 	/**
-	 * Write train-test split files
+	 * Writes train-test split files.
 	 * @throws  java.io.IOException if there is an error writing the files.
 	 */
 	@Override
@@ -67,15 +67,15 @@ public class CrossfoldColdUserTask extends CrossfoldTask {
 	}
 
 	/**
-	 * Write the split files by Users from the DAO using specified holdout method.
+	 * It writes the split files by Users from the DAO using specified holdout method.
 	 * The "coldPercent"% (default 30%) of the test users has a number of training ratings < 20 (cold start situation).
-	 * @param trainWriters The tableWriter that write train files
-	 * @param testWriters The tableWriter that writ test files
+	 * @param trainWriters The tableWriter that write train files.
+	 * @param testWriters The tableWriter that writ test files.
 	 * @throws org.grouplens.lenskit.eval.TaskExecutionException
 	 */
 	private void writeTTFiles(TableWriter[] trainWriters, TableWriter[] testWriters) throws TaskExecutionException  {
 
-		logger.info("splitting data source {} to {} partitions by users", getName(), getPartitionCount());
+		logger.info("Splitting data source {} to {} partitions by users", getName(), getPartitionCount());
 
 		Long2IntMap splits = splitUsers(getSource().getUserDAO()); 
 
@@ -86,7 +86,7 @@ public class CrossfoldColdUserTask extends CrossfoldTask {
 		Holdout mode = this.getHoldout();
 		try {
 
-			logger.info("cold start test users in each partition: {}%", coldPercent);
+			logger.info("Cold start test users in each partition: {}%", coldPercent);
 
 			ArrayList<UserHistory<Rating>> histories = Cursors.makeList(getSource().getUserEventDAO().streamEventsByUser(Rating.class));
 			Collections.shuffle(histories);
@@ -131,18 +131,20 @@ public class CrossfoldColdUserTask extends CrossfoldTask {
 		}
 	}
 
-
-
 	/**
-	 * Set how many test user must be in cold start situation.
-	 * @param csPercentual cold start test user percentage 
+	 * It sets how many test user must be in cold start situation.
+	 * @param csPercentual Cold start test user percentage. 
 	 */
 	public void setColdStartCasesPercentual(int csPercentual) {
 		this.coldPercent = csPercentual;
 	}
 
-
-
+	/**
+	 * It returns the list of users in the partition 'i'
+	 * @param i The partition index.
+	 * @param splits Map containing couple <user,partition>.
+	 * @return The list of user in partition 'i'.
+	 */
 	private LinkedList<Long> getPartitionUsers(int i, Long2IntMap splits) {
 		LinkedList<Long> users = new LinkedList<Long>();
 		for(long u : splits.keySet())
@@ -151,8 +153,11 @@ public class CrossfoldColdUserTask extends CrossfoldTask {
 		return users;
 	}
 
-
-	class Partition {
+	/**
+	 * Inner class that stores information about the training profile size of 
+	 * cold start users in a partition.
+	 */
+	private class Partition {
 
 		private Long2IntMap csUsers;
 		private final int numProfiles = 20;
@@ -174,14 +179,28 @@ public class CrossfoldColdUserTask extends CrossfoldTask {
 			splitCSUsersIntoProfileSizes();
 		}
 
+		/**
+		 * It checks if the user is in cold start situation.
+		 * @param user User to check.
+		 * @return true if the user is in cold start situazion, otherwise false.
+		 */
 		public boolean isColdStartUser(long user){
 			return csUsers.containsKey(user);
 		}
 
+		/**
+		 * It returns the profile size of a given user.
+		 * @param user The user.
+		 * @return The training profile size.
+		 */
 		public int getProfileSizeForUser(long user){
 			return csUsers.get(user);
 		}
 
+		/**
+		 * It splits test users in cold start situation equally into profile sizes 
+		 * from 0 to 19 ratings in the training set. 
+		 */
 		private void splitCSUsersIntoProfileSizes(){
 			LongArrayList users = new LongArrayList(csUsers.keySet());
 			LongLists.shuffle(users, getProject().getRandom());
