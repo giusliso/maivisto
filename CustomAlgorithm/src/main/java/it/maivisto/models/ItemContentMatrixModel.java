@@ -24,7 +24,7 @@ public class ItemContentMatrixModel implements Serializable, ItemItemModel {
 	}
 
 	/**
-	 * Get the set of all items in the model.
+	 * It gets the set of all items in the model.
 	 * @return The set of item IDs for all items in the model.
 	 */
 	@Override
@@ -33,9 +33,9 @@ public class ItemContentMatrixModel implements Serializable, ItemItemModel {
 	}
 
 	/**
-	 * Get the neighbors of an item scored by similarity. This is the corresponding row of the item-content matrix.
+	 * It gets the neighbors of an item scored by similarity. This is the corresponding row of the item-content similarity matrix.
 	 * @param item The item to get the neighborhood for.
-	 * @return The row of the item-content matrix. If the item is unknown, an empty vector is returned.
+	 * @return The row of the item-content similarity matrix. If the item is unknown, an empty vector is returned.
 	 */
 	@Override
 	public SparseVector getNeighbors(long item) {

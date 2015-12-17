@@ -25,7 +25,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSortedSet;
 
 /**
- * Build a co-occurrence model from rating data and normalize it (co-occurrence / max).
+ * Builds a co-occurrence model from rating data and normalize it (co-occurrence / max).
  */
 @NotThreadSafe
 public class CoOccurrenceMatrixModelBuilder implements Provider<ItemItemModel> {
@@ -40,7 +40,7 @@ public class CoOccurrenceMatrixModelBuilder implements Provider<ItemItemModel> {
 	}
 
 	/**
-	 * Create the co-occurrence matrix.
+	 * Creates the co-occurrence matrix.
 	 */
 	@Override
 	public ItemItemModel get() {
@@ -49,8 +49,8 @@ public class CoOccurrenceMatrixModelBuilder implements Provider<ItemItemModel> {
 		LongSortedSet allItems = context.getItems();
 		int nitems = allItems.size();
 
-		logger.info("building item-item model for {} items", nitems);
-		logger.info("co-occurrence function is symmetric");
+		logger.info("Building item-item model for {} items", nitems);
+		logger.info("Co-occurrence function is symmetric");
 
 		Long2ObjectMap<ScoredItemAccumulator> rows = makeAccumulators(allItems);
 
@@ -61,7 +61,7 @@ public class CoOccurrenceMatrixModelBuilder implements Provider<ItemItemModel> {
 			SparseVector vecI = context.itemVector(i);
 
 			if (logger.isDebugEnabled()) 
-				logger.info("computing co-occurrences for item {} ({} of {})", i, ndone, nitems);
+				logger.info("Computing co-occurrences for item {} ({} of {})", i, ndone, nitems);
 
 			for(LongBidirectionalIterator itJ = allItems.iterator(i); itJ.hasNext(); ) {
 				Long j = itJ.next();
@@ -75,15 +75,15 @@ public class CoOccurrenceMatrixModelBuilder implements Provider<ItemItemModel> {
 			}
 
 			if (logger.isDebugEnabled() && ndone % 100 == 0) 
-				logger.info("computed {} of {} model rows ({}s/row)", 
+				logger.info("Computed {} of {} model rows ({}s/row)", 
 						ndone, nitems, 
 						String.format("%.3f", timer.elapsed(TimeUnit.MILLISECONDS) * 0.001 / ndone));
 
 			ndone++;
 		}
 
-		logger.info("max co-occurrence value = {}", max);
-		logger.info("normalizing item-item model");
+		logger.info("Max co-occurrence value = {}", max);
+		logger.info("Normalizing item-item model");
 
 		for(Long i : rows.keySet()){
 			ScoredItemAccumulator acc = new UnlimitedScoredItemAccumulator();			
@@ -91,10 +91,10 @@ public class CoOccurrenceMatrixModelBuilder implements Provider<ItemItemModel> {
 				acc.put(val.getId(), val.getScore()/max);					
 			rows.put(i, acc);
 		}
-		logger.info("normalized item-item model");		
+		logger.info("Normalized item-item model");		
 
 		timer.stop();
-		logger.info("built model for {} items in {}", ndone, timer);
+		logger.info("Built model for {} items in {}", ndone, timer);
 
 		return new CoOccurrenceMatrixModel(finishRows(rows));
 	}

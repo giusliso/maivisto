@@ -37,7 +37,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import it.unimi.dsi.fastutil.longs.LongSortedSet;
 
 /**
- * Build a item content similarity model.
+ * Builds a item content similarity model.
  */
 @NotThreadSafe
 public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
@@ -59,7 +59,7 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 
 
 	/**
-	 * Create the item-content matrix.
+	 * Creates or updates the item-content similarity matrix.
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
@@ -98,7 +98,11 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 	}
 
 
-
+	/**
+	 * Creates the item-content similarity matrix. 
+	 * @param allItems The items to consider.
+	 * @throws InterruptedException
+	 */
 	private void buildModel(LongSortedSet allItems) throws InterruptedException {
 		int nitems = allItems.size();
 		totSimilarities = (nitems*(nitems-1))/2;
@@ -120,8 +124,8 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 
 		icMap = getItemsContentMap(); // read item content and store it in a map
 
-		logger.info("building item-content similarity model for {} items", nitems);
-		logger.info("item-content similarity model is symmetric");
+		logger.info("Building item-content similarity model for {} items", nitems);
+		logger.info("Item-content similarity model is symmetric");
 
 		rows = makeAccumulators(allItems);
 
@@ -157,10 +161,18 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 			Thread.sleep(0);
 
 		timer.stop();
-		logger.info("built model for {} items in {}", nitems, timer);
+		logger.info("Built model for {} items in {}", nitems, timer);
 
 	}
 
+	/**
+	 * Updates the item-content similarity matrix. 
+	 * @param newItems The set of items added to the serialized model.
+	 * @param serializedItems The set of items in the serialized model.
+	 * @param deletedItems The set of items deleted from the serialized model.
+	 * @param allItems The set of items in the current dataset.
+	 * @throws InterruptedException
+	 */
 	private void updateModel(LongSortedSet newItems, LongSortedSet serializedItems, LongSortedSet deletedItems, LongSortedSet allItems) throws InterruptedException {
 		Stopwatch timer = Stopwatch.createStarted();
 
@@ -180,7 +192,7 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 			for(long di : deletedItems)
 				rows.remove(di);
 
-			logger.info("deleted {} items from serialized item-content model", deletedItems.size());
+			logger.info("Deleted {} items from serialized item-content model", deletedItems.size());
 		}
 
 		// add new items similarities	
@@ -207,8 +219,8 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 
 			icMap = getItemsContentMap(); // read item content and store it in a map
 
-			logger.info("updating item-content similarity model with {} new items", newItemsSize);
-			logger.info("item-content similarity model is symmetric");
+			logger.info("Updating item-content similarity model with {} new items", newItemsSize);
+			logger.info("Item-content similarity model is symmetric");
 
 			int countItems=0;
 			int currThread=0;
@@ -244,13 +256,16 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 			while(threadCount!=0)
 				Thread.sleep(0);
 
-			logger.info("added similarities for {} new items to serialized item-content model", newItemsSize);
+			logger.info("Added similarities for {} new items to serialized item-content model", newItemsSize);
 		}
 		timer.stop();
-		logger.info("update model in {}", timer);
+		logger.info("Update model in {}", timer);
 	}
 
-
+	/**
+	 * It reads the item content from files.
+	 * @return A map containing couples <item, content>.
+	 */
 	private HashMap<Long,String> getItemsContentMap(){
 		HashMap<Long,String> icMap = new HashMap<Long,String>();
 		for(long item : context.getItems()){
@@ -265,6 +280,12 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 		return icMap;
 	}
 
+	/**
+	 * It reads the content of an item from file.
+	 * @param item The item.
+	 * @return The content read from file.
+	 * @throws IOException
+	 */
 	private String readItemContent(long item) throws IOException{
 		logger.info("reading content item {}",item);
 		StringBuilder sb = new StringBuilder();
@@ -294,10 +315,9 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 	}
 
 
-
-
-
-
+	/**
+	 * Inner class that stores index of a similarity to compute.
+	 */
 	class Similarity {
 		private long i;
 		private long j;
@@ -326,14 +346,15 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 
 		@Override
 		public int hashCode() {
-			// TODO Auto-generated method stub
 			return 0;
 		}
 
 	}
 
 
-
+	/**
+	 * Thread that computes a certain number of similarities.
+	 */
 	class ItemContentThread extends Thread {
 		private STS valueSim;
 		private LinkedList<Similarity> similarities;
@@ -354,7 +375,7 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 					rows.get(i).put(j, simIJ);
 					rows.get(j).put(i, simIJ);
 					computedSims++;
-					logger.info("computed content similarity sim({},{}) = sim({},{}) = {}", i, j, j, i, simIJ);
+					logger.info("Computed content similarity sim({},{}) = sim({},{}) = {}", i, j, j, i, simIJ);
 					logger.info("Progress = {}% - {}/{} completed", (double)(computedSims*100/totSimilarities),computedSims,totSimilarities);
 
 				} catch (Exception e) {
@@ -363,7 +384,7 @@ public class ItemContentMatrixModelBuilder implements Provider<ItemItemModel> {
 			} 
 
 			threadCount--;
-			logger.info("thread finishes - computed {} similarities",similarities.size());
+			logger.info("Thread finishes - computed {} similarities",similarities.size());
 		}
 
 		public void addSimilarity(Similarity similarity) {

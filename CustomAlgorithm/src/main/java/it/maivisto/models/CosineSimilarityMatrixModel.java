@@ -15,7 +15,8 @@ import it.maivisto.utility.Utilities;
 import it.unimi.dsi.fastutil.longs.LongSortedSet;
 
 /**
- * Cosine similarity matrix. Extends the default SimilarityMatrixModel normalizing the similarity values.
+ * Cosine similarity matrix. 
+ * Extends the default SimilarityMatrixModel normalizing the similarity values.
  */
 @DefaultProvider(ItemItemModelBuilder.class)
 @Shareable
@@ -29,6 +30,33 @@ public class CosineSimilarityMatrixModel extends SimilarityMatrixModel{
 		model = normalize(nbrs);
 	}
 
+	/**
+     * It gets the set of all items in the model.
+     * @return The set of item IDs for all items in the model.
+     */
+	@Override
+	public LongSortedSet getItemUniverse() {	
+		return LongUtils.packedSet(model.keySet());
+	}
+
+	/**
+     * It gets the neighbors of an item scored by similarity. This is the corresponding row of the cosine similarity matrix.
+     * @param item The item to get the neighborhood for.
+     * @return The row of the normalized cosine similarity matrix. If the item is unknown, an empty vector is returned.
+     */
+	@Override
+	public SparseVector getNeighbors(long item) {
+		if (model.containsKey(item))
+			return model.get(item);
+		else
+			return ImmutableSparseVector.empty();
+	}
+	
+	/**
+	 * It normalizes the cosine similarity matrix.
+	 * @param model The matrix to normalize.
+	 * @return The normalized matrix.
+	 */
 	private Map<Long, ImmutableSparseVector> normalize(Map<Long, ImmutableSparseVector> model) {
 		Map<Long, ImmutableSparseVector> mod = new HashMap<Long, ImmutableSparseVector>();
 		for(Long i : model.keySet()){
@@ -40,27 +68,5 @@ public class CosineSimilarityMatrixModel extends SimilarityMatrixModel{
 			model.put(i, v.immutable());
 		}
 		return mod;
-	}
-
-	/**
-     * Get the set of all items in the model.
-     * @return The set of item IDs for all items in the model.
-     */
-	@Override
-	public LongSortedSet getItemUniverse() {	
-		return LongUtils.packedSet(model.keySet());
-	}
-
-	/**
-     * Get the neighbors of an item scored by similarity. This is the corresponding row of the cosine similarity matrix.
-     * @param item The item to get the neighborhood for.
-     * @return The row of the co-occurrence matrix. If the item is unknown, an empty vector is returned.
-     */
-	@Override
-	public SparseVector getNeighbors(long item) {
-		if (model.containsKey(item))
-			return model.get(item);
-		else
-			return ImmutableSparseVector.empty();
 	}
 }

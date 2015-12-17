@@ -24,7 +24,7 @@ public class CoOccurrenceMatrixModel implements Serializable, ItemItemModel {
 	}
 
 	/**
-     * Get the set of all items in the model.
+     * It gets the set of all items in the model.
      * @return The set of item IDs for all items in the model.
      */
 	@Override
@@ -33,7 +33,7 @@ public class CoOccurrenceMatrixModel implements Serializable, ItemItemModel {
 	}
 
 	/**
-     * Get the neighbors of an item scored by similarity. This is the corresponding row of the co-occurrence matrix.
+     * It gets the neighbors of an item scored by similarity. This is the corresponding row of the co-occurrence matrix.
      * @param item The item to get the neighborhood for.
      * @return The row of the co-occurrence matrix. If the item is unknown, an empty vector is returned.
      */
