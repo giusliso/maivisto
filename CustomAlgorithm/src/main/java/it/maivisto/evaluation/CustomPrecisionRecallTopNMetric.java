@@ -31,9 +31,8 @@ public class CustomPrecisionRecallTopNMetric extends AbstractMetric<CustomPrecis
     private final ItemSelector candidates;
     private final ItemSelector exclude;
 
-
     /**
-     * @param listSize The number of recommendations 
+     * @param listSize The number of recommendations. 
      * @param candidates The candidate selector.
      * @param exclude The exclude selector.
      */
@@ -56,11 +55,8 @@ public class CustomPrecisionRecallTopNMetric extends AbstractMetric<CustomPrecis
     	UserHistory<Rating> history = user.getTrainHistory().filter(Rating.class);	
 		double userMeanRating = Utilities.meanValue(history);
 
-		LongSet items = ItemSelectors.testRatingMatches(Matchers.greaterThanOrEqualTo(userMeanRating))
-				.select(user);
+		LongSet items = ItemSelectors.testRatingMatches(Matchers.greaterThanOrEqualTo(userMeanRating)).select(user);
 		
-        int tp = 0;
-
         if (items.isEmpty())
             logger.warn("No good items for user {}", user.getUserId());
 
@@ -71,6 +67,7 @@ public class CustomPrecisionRecallTopNMetric extends AbstractMetric<CustomPrecis
         }
 
         logger.info("Searching for {} good items among {} recommendations for {}", items.size(), recs.size(), user.getUserId());
+        int tp = 0;
         for(ScoredId s : recs)
             if(items.contains(s.getId()))
                 tp += 1;
@@ -121,14 +118,12 @@ public class CustomPrecisionRecallTopNMetric extends AbstractMetric<CustomPrecis
         }
 
         public Result finish() {
-            if (nusers > 0) {
+            if (nusers > 0)
                 return new Result(totalPrecision / nusers, totalRecall / nusers, totalFMeasure / nusers);
-            } else {
-                return null;
-            }
+            else
+                return null;          
         }
     }
-
 
     public static class Builder extends TopNMetricBuilder<CustomPrecisionRecallTopNMetric>{
 
@@ -142,5 +137,4 @@ public class CustomPrecisionRecallTopNMetric extends AbstractMetric<CustomPrecis
             return new CustomPrecisionRecallTopNMetric(listSize, candidates, exclude);
         }
     }
-
 }

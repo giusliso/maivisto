@@ -24,8 +24,8 @@ import it.maivisto.utility.Utilities;
 import it.unimi.dsi.fastutil.longs.LongSet;
 
 /**
- * Evaluate a recommender's prediction accuracy with RMSE,
- * computed on items in the intersection set between the test items
+ * A metric to compute the RMSE of a recommender.
+ * The RMSE is computed on items in the intersection set between the test items
  * and the recommended ones. 
  */
 public class CustomRMSEPredictMetric extends AbstractMetric<CustomRMSEPredictMetric.Context, CustomRMSEPredictMetric.AggregateResult, CustomRMSEPredictMetric.UserResult> {
@@ -36,10 +36,10 @@ public class CustomRMSEPredictMetric extends AbstractMetric<CustomRMSEPredictMet
 	private final ItemSelector exclude;
 
 	/**
-     * @param listSize The number of recommendations 
-     * @param candidates The candidate selector.
-     * @param exclude The exclude selector.
-     */
+	 * @param listSize The number of recommendations. 
+	 * @param candidates The candidate selector.
+	 * @param exclude The exclude selector.
+	 */
 	public CustomRMSEPredictMetric(int listSize, ItemSelector candidates, ItemSelector exclude) {
 		super(AggregateResult.class, UserResult.class);
 		this.listSize = listSize;
@@ -71,12 +71,12 @@ public class CustomRMSEPredictMetric extends AbstractMetric<CustomRMSEPredictMet
 		}
 
 		logger.info("Searching for {} good items among {} recommendations for {}", goodTestItems.size(), recs.size(), user.getUserId());
-		
+
 		List<ScoredId> commonItems = new LinkedList<ScoredId>(); // test items ∩ recommended items
 		for(ScoredId s : recs)
 			if(goodTestItems.contains(s.getId())) 
 				commonItems.add(s);
-			
+
 		SparseVector testRatings = user.getTestRatings();
 		double sse = 0;
 		int n = 0;
@@ -142,23 +142,23 @@ public class CustomRMSEPredictMetric extends AbstractMetric<CustomRMSEPredictMet
 				double v = sqrt(totalSSE / nratings);
 				logger.info("RMSE: {}", v);
 				return new AggregateResult(totalRMSE / nusers, v);
-			} else {
-				return null;
-			}
+			} 
+			else
+				return null; 		
 		}
 	}
-	
 
 
-    public static class Builder extends TopNMetricBuilder<CustomRMSEPredictMetric>{
 
-        public Builder() {
-            setCandidates(ItemSelectors.allItems());
-        }
+	public static class Builder extends TopNMetricBuilder<CustomRMSEPredictMetric>{
 
-        @Override
-        public CustomRMSEPredictMetric build() {
-            return new CustomRMSEPredictMetric(listSize, candidates, exclude);
-        }
-    }
+		public Builder() {
+			setCandidates(ItemSelectors.allItems());
+		}
+
+		@Override
+		public CustomRMSEPredictMetric build() {
+			return new CustomRMSEPredictMetric(listSize, candidates, exclude);
+		}
+	}
 }
