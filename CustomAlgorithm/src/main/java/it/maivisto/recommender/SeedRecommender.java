@@ -67,10 +67,10 @@ public class SeedRecommender extends AbstractItemRecommender {
 
 
 	/**
-	 * Recommend a list of item to a user
+	 * Recommends a list of item to a user.
 	 * @param user The user ID.
 	 * @param n The number of recommendations to produce, or a negative value to produce unlimited recommendations.
-	 * @param candidates The candidate items
+	 * @param candidates The candidate items.
 	 * @param exclude The exclude set
 	 * @return The result list.
 	 */
@@ -102,7 +102,7 @@ public class SeedRecommender extends AbstractItemRecommender {
 
 		if(this.activate_standard_seed) {
 			SeedItemSet set = new SeedItemSet(dao);
-			Set<Long> seeds = set.getSeedItemSet();
+			Set<Long> seeds = set.getStandardSeedItemSet();
 			for (long seed : seeds) {
 				double score = scorer.score(user, seed);
 				seedMap.put(seed, score);	
@@ -289,10 +289,10 @@ public class SeedRecommender extends AbstractItemRecommender {
 	}
 
 	/**
-	 * Checks if a user has already rated an item
-	 * @param userHistory list of user ratings
-	 * @param seed the item to check
-	 * @return true if the user has already rated the item, otherwise false
+	 * Checks if a user has already rated an item.
+	 * @param userHistory The liist of user ratings.
+	 * @param seed The item to check.
+	 * @return True if the user has already rated the item, otherwise false.
 	 */
 	private boolean hasRatedItem(UserHistory<Rating> userHistory, long seed) {
 		if(userHistory == null)
@@ -304,12 +304,12 @@ public class SeedRecommender extends AbstractItemRecommender {
 	}
 
 	/**
-	 * Product recommendation list of size N for a registered user ID.
-	 * @param user the considered user
-	 * @param n number of recommendations
-	 * @param seed_itemset external seed items
-	 * @param activate_standard_seed true if standard seed must be used, false otherwise
-	 * @return the recommendations list
+	 * Products recommendation list of size N for a registered user ID.
+	 * @param user The considered user.
+	 * @param n Number of recommendations.
+	 * @param seed_itemset External seed items.
+	 * @param activate_standard_seed True if standard seed must be used, false otherwise.
+	 * @return The recommendations list.
 	 */
 	public List<ScoredId> get_recommendation_list(long user, int n, Set<Long> seed_itemset, boolean activate_standard_seed){
 		this.seed_itemset=seed_itemset;
@@ -318,11 +318,11 @@ public class SeedRecommender extends AbstractItemRecommender {
 	}
 
 	/**
-	 * Product recommendation list of size N for a registered user ID without external itemset.  
-	 * @param user the considered user
-	 * @param n number of recommendations
-	 * @param activate_standard_seed true if standard seed must be used, false otherwise
-	 * @return the recommendations list
+	 * Products recommendation list of size N for a registered user ID without external itemset.  
+	 * @param user The considered user.
+	 * @param n Number of recommendations.
+	 * @param activate_standard_seed True if standard seed must be used, false otherwise.
+	 * @return The recommendations list.
 	 */
 	public List<ScoredId> get_recommendation_list(long user, int n, boolean activate_standard_seed){
 		this.activate_standard_seed=activate_standard_seed;
@@ -330,11 +330,11 @@ public class SeedRecommender extends AbstractItemRecommender {
 	}
 
 	/**
-	 * Product recommendation list of size N for a registered user ID
-	 * @param n number of recommendations
-	 * @param seed_itemset external seed items
-	 * @param activate_standard_seed true if standard seed must be used, false otherwise
-	 * @return the recommendations list
+	 * ProductS recommendation list of size N for a registered user ID.
+	 * @param n Number of recommendations.
+	 * @param seed_itemset External seed items.
+	 * @param activate_standard_seed True if standard seed must be used, false otherwise.
+	 * @return The recommendations list.
 	 */
 	public List<ScoredId> get_recommendation_list(int n, Set<Long> seed_itemset, boolean activate_standard_seed){
 		this.seed_itemset=seed_itemset;
@@ -343,9 +343,9 @@ public class SeedRecommender extends AbstractItemRecommender {
 	}
 
 	/**
-	 * Product recommendation list of size N for the anonymous user, similar to the service to the user registered with the passage of seed
-	 * @param n number of recommendations
-	 * @return the recommendations list
+	 * ProductS recommendation list of size N for the anonymous user, similar to the service to the user registered with the passage of seed.
+	 * @param n Number of recommendations.
+	 * @return The recommendations list.
 	 */
 	public List<ScoredId> get_recommendation_list(int n){
 		return this.recommend(-1, n);
