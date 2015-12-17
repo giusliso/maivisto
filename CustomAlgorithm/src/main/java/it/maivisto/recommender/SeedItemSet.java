@@ -59,6 +59,10 @@ public class SeedItemSet {
 
 	/**
 	 * Retrieves the four standard seed items.
+	 * - the most popular item of ever;
+	 * - the most popular item of the last week;
+	 * - the last positevely rated item;
+	 * - the last added item not rated.
 	 * @return The standard seed items set.
 	 */
 	public Set<Long> getStandardSeedItemSet() {
