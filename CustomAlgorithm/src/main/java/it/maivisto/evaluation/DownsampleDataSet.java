@@ -1,3 +1,4 @@
+package it.maivisto.evaluation;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.longs.*;
@@ -5,7 +6,6 @@ import org.grouplens.lenskit.cursors.Cursor;
 import org.grouplens.lenskit.data.dao.EventDAO;
 import org.grouplens.lenskit.data.event.Rating;
 import org.grouplens.lenskit.data.history.UserHistory;
-import org.grouplens.lenskit.data.pref.Preference;
 import org.grouplens.lenskit.data.source.CSVDataSourceBuilder;
 import org.grouplens.lenskit.data.source.DataSource;
 import org.grouplens.lenskit.eval.AbstractTask;
@@ -18,9 +18,6 @@ import org.grouplens.lenskit.util.io.Descriptions;
 import org.grouplens.lenskit.util.io.HashDescriptionWriter;
 import org.grouplens.lenskit.util.io.UpToDateChecker;
 import org.grouplens.lenskit.util.table.writer.CSVWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -31,7 +28,6 @@ import java.util.*;
  * it should support arbitrary downsamplers.
  */
 public class DownsampleDataSet extends AbstractTask<List<TTDataSet>> {
-    private static final Logger logger = LoggerFactory.getLogger(DownsampleDataSet.class);
 
     List<TTDataSet> sources;
     private int retain = 0;
@@ -99,7 +95,8 @@ public class DownsampleDataSet extends AbstractTask<List<TTDataSet>> {
         return datasets;
     }
 
-    private DataSource downsample(DataSource data, LongSet testUsers) throws IOException {
+    @SuppressWarnings("unchecked")
+	private DataSource downsample(DataSource data, LongSet testUsers) throws IOException {
         String fileName = getFileName(data);
         File output = new File(fileName);
         UpToDateChecker checker = new UpToDateChecker();
@@ -121,7 +118,6 @@ public class DownsampleDataSet extends AbstractTask<List<TTDataSet>> {
                     for (int i = 0; i < rats.size(); i++) {
                         if (!testUsers.contains(ratings.getUserId()) || i < retain) {
                             Rating rating = rats.get(i);
-                            Preference pref = rating.getPreference();
                             csv.writeRow(Lists.newArrayList(rating.getUserId(), rating.getItemId(), rating.getValue(), rating.getTimestamp()));
                         }
                     }
