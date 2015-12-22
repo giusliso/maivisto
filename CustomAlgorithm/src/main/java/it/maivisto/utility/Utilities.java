@@ -31,7 +31,7 @@ public class Utilities {
 		for(Rating rate : userHistory) 
 			sum += rate.getValue();
 		if(userHistory.isEmpty())
-			return 1;
+			return sum;
 		else
 			return sum/userHistory.size();
 	}
