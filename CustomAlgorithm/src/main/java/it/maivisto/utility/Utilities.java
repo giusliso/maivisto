@@ -30,6 +30,9 @@ public class Utilities {
 		double sum=0.0;
 		for(Rating rate : userHistory) 
 			sum += rate.getValue();
-		return sum/userHistory.size();
+		if(userHistory.isEmpty())
+			return 1;
+		else
+			return sum/userHistory.size();
 	}
 }
